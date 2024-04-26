@@ -1,0 +1,12 @@
+spring:
+  application:
+    name: hogwarts-artifacts-api
+  datasource:
+    url: jdbc:h2:mem:hogwarts
+    username: sa
+    password:
+    driver-class-name: org.h2.Driver
+
+server:
+  servlet:
+    context-path: /api/v1
