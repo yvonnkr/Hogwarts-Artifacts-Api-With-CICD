@@ -1,5 +1,6 @@
 package com.yvolabs.hogwartsartifactsapi.artifact;
 
+import com.yvolabs.hogwartsartifactsapi.system.exception.ObjectNotFoundException;
 import com.yvolabs.hogwartsartifactsapi.utils.IdWorker;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -21,7 +22,7 @@ public class ArtifactServiceImpl implements ArtifactService {
     public Artifact findById(String artifactId) {
 
         return artifactRepository.findById(artifactId)
-                .orElseThrow(() -> new ArtifactNotFoundException(artifactId));
+                .orElseThrow(() -> new ObjectNotFoundException("artifact", artifactId));
     }
 
     @Override
@@ -47,13 +48,13 @@ public class ArtifactServiceImpl implements ArtifactService {
                     return artifactRepository.save(oldArtifact);
 
                 })
-                .orElseThrow(() -> new ArtifactNotFoundException(artifactId));
+                .orElseThrow(() -> new ObjectNotFoundException("artifact", artifactId));
     }
 
     @Override
     public void delete(String artifactId) {
         artifactRepository.findById(artifactId)
-                .orElseThrow(() -> new ArtifactNotFoundException(artifactId));
+                .orElseThrow(() -> new ObjectNotFoundException("artifact", artifactId));
         artifactRepository.deleteById(artifactId);
 
     }

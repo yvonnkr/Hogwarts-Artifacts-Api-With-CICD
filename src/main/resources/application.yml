@@ -7,6 +7,7 @@ spring:
     password:
     driver-class-name: org.h2.Driver
 
-server:
-  servlet:
-    context-path: /api/v1
+# custom properties - to access example @Value("${api.endpoint.base-url}")
+api:
+  endpoint:
+    base-url: /api/v1
