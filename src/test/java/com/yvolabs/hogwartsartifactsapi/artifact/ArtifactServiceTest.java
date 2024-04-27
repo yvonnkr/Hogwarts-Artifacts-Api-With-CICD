@@ -1,5 +1,6 @@
 package com.yvolabs.hogwartsartifactsapi.artifact;
 
+import com.yvolabs.hogwartsartifactsapi.system.exception.ObjectNotFoundException;
 import com.yvolabs.hogwartsartifactsapi.utils.IdWorker;
 import com.yvolabs.hogwartsartifactsapi.wizard.Wizard;
 import org.junit.jupiter.api.BeforeEach;
@@ -90,7 +91,7 @@ class ArtifactServiceTest {
         );
 
         assertThat(throwable)
-                .isInstanceOf(ArtifactNotFoundException.class)
+                .isInstanceOf(ObjectNotFoundException.class)
                 .hasMessageContaining("Could not find artifact with Id 1250808601744904192");
 
         verify(artifactRepository, times(1)).findById(Mockito.anyString());
@@ -161,7 +162,7 @@ class ArtifactServiceTest {
 
         given(artifactRepository.findById(artifactId)).willReturn(Optional.empty());
 
-        assertThrows(ArtifactNotFoundException.class, () -> artifactService.update(artifactId, update));
+        assertThrows(ObjectNotFoundException.class, () -> artifactService.update(artifactId, update));
         verify(artifactRepository, times(1)).findById(artifactId);
     }
 
@@ -178,7 +179,7 @@ class ArtifactServiceTest {
     void testDeleteNotFound() {
         String artifactId = "1250808601744904191";
         given(artifactRepository.findById(artifactId)).willReturn(Optional.empty());
-        assertThrows(ArtifactNotFoundException.class, () -> artifactService.delete(artifactId));
+        assertThrows(ObjectNotFoundException.class, () -> artifactService.delete(artifactId));
         verify(artifactRepository, times(1)).findById(artifactId);
     }
 

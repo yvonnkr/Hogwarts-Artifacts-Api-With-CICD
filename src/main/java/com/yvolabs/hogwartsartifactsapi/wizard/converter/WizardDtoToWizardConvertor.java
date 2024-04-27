@@ -9,14 +9,12 @@ import org.springframework.stereotype.Component;
  * @author Yvonne N
  */
 @Component
-public class WizardToWizardDtoConverter implements Converter<Wizard, WizardDto> {
+public class WizardDtoToWizardConvertor implements Converter<WizardDto, Wizard> {
     @Override
-    public WizardDto convert(Wizard source) {
-        return WizardDto.builder()
-                .id(source.getId())
-                .name(source.getName())
-                .numberOfArtifacts(source.getNumberOfArtifacts())
+    public Wizard convert(WizardDto source) {
+        return Wizard.builder()
+                .id(source.id())
+                .name(source.name())
                 .build();
-
     }
 }

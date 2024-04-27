@@ -3,12 +3,14 @@ package com.yvolabs.hogwartsartifactsapi.artifact;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.yvolabs.hogwartsartifactsapi.artifact.dto.ArtifactDto;
 import com.yvolabs.hogwartsartifactsapi.system.StatusCode;
+import com.yvolabs.hogwartsartifactsapi.system.exception.ObjectNotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
@@ -43,7 +45,8 @@ class ArtifactControllerTest {
 
     List<Artifact> artifacts;
 
-    private static final String PATH = "/artifacts";
+    @Value("${api.endpoint.base-url}/artifacts")
+    private String PATH ;
 
     @BeforeEach
     void setUp() {
@@ -67,11 +70,11 @@ class ArtifactControllerTest {
     @Test
     void testFindArtifactByIdNotFound() throws Exception {
         String artifactId = "1250808601744904191";
-        given(artifactService.findById(artifactId)).willThrow(new ArtifactNotFoundException(artifactId));
+        given(artifactService.findById(artifactId)).willThrow(new ObjectNotFoundException("artifact",artifactId));
 
         // When and then
         mockMvc.perform(get(PATH + "/" + artifactId).accept(MediaType.APPLICATION_JSON))
-                .andExpect(result -> assertInstanceOf(ArtifactNotFoundException.class, result.getResolvedException()))
+                .andExpect(result -> assertInstanceOf(ObjectNotFoundException.class, result.getResolvedException()))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.flag").value(false))
                 .andExpect(jsonPath("$.code").value(StatusCode.NOT_FOUND))
@@ -200,13 +203,13 @@ class ArtifactControllerTest {
 
         String json = this.objectMapper.writeValueAsString(artifactDto);
 
-        given(this.artifactService.update(eq(artifactId), Mockito.any(Artifact.class))).willThrow(new ArtifactNotFoundException(artifactId));
+        given(this.artifactService.update(eq(artifactId), Mockito.any(Artifact.class))).willThrow(new ObjectNotFoundException("artifact",artifactId));
 
         this.mockMvc.perform(put(PATH + "/" + artifactId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(json)
                         .accept(MediaType.APPLICATION_JSON))
-                .andExpect(result -> assertInstanceOf(ArtifactNotFoundException.class, result.getResolvedException()))
+                .andExpect(result -> assertInstanceOf(ObjectNotFoundException.class, result.getResolvedException()))
                 .andExpect(jsonPath("$.flag").value(false))
                 .andExpect(jsonPath("$.code").value(StatusCode.NOT_FOUND))
                 .andExpect(jsonPath("$.message").value("Could not find artifact with Id " + artifactId))
@@ -260,10 +263,10 @@ class ArtifactControllerTest {
     @Test
     void testDeleteArtifactErrorWithNonExistentId() throws Exception {
         String artifactId = "1250808601744904191";
-        doThrow(new ArtifactNotFoundException(artifactId)).when(artifactService).delete(eq(artifactId));
+        doThrow(new ObjectNotFoundException("artifact",artifactId)).when(artifactService).delete(eq(artifactId));
 
         mockMvc.perform(delete(PATH + "/" + artifactId).accept(MediaType.APPLICATION_JSON))
-                .andExpect(result -> assertInstanceOf(ArtifactNotFoundException.class, result.getResolvedException()))
+                .andExpect(result -> assertInstanceOf(ObjectNotFoundException.class, result.getResolvedException()))
                 .andExpect(jsonPath("$.flag").value(false))
                 .andExpect(jsonPath("$.code").value(StatusCode.NOT_FOUND))
                 .andExpect(jsonPath("$.message").value("Could not find artifact with Id " + artifactId))

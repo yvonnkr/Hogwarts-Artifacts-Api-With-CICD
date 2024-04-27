@@ -20,9 +20,9 @@ import java.util.List;
 @RestControllerAdvice
 public class ExceptionHandlerAdvice {
 
-    @ExceptionHandler(ArtifactNotFoundException.class)
+    @ExceptionHandler(ObjectNotFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
-    Result handleArtifactNotFoundException(ArtifactNotFoundException ex) {
+    Result handleObjectNotFoundException(ObjectNotFoundException ex) {
         return Result.builder()
                 .flag(false)
                 .code(StatusCode.NOT_FOUND)

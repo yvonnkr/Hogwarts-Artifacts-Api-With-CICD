@@ -1,9 +1,17 @@
 package com.yvolabs.hogwartsartifactsapi.wizard.dto;
 
+import jakarta.validation.constraints.NotEmpty;
+import lombok.Builder;
+
 /**
  * @author Yvonne N
  */
-public record WizardDto(Integer id,
-                        String name,
-                        Integer numberOfArtifacts) {
+@Builder
+public record WizardDto(
+        Integer id,
+
+        @NotEmpty(message = "name is required")
+        String name,
+
+        Integer numberOfArtifacts) {
 }
