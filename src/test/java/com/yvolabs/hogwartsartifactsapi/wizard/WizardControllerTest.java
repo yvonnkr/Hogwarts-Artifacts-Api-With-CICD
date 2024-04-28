@@ -219,45 +219,6 @@ class WizardControllerTest {
     }
 
     @Test
-    void testAssignArtifactSuccess() throws Exception {
-        doNothing().when(wizardService).assignArtifact(any(), any());
-
-        // wizards/{wizardId}/artifacts/{artifactId}
-        mockMvc.perform(put(PATH + "/1/artifacts/1250808601744904192")
-                        .accept(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.flag").value(true))
-                .andExpect(jsonPath("$.code").value(StatusCode.SUCCESS))
-                .andExpect(jsonPath("$.message").value("Artifact Assignment Success"));
-        verify(wizardService, times(1)).assignArtifact(any(), any());
-    }
-
-    @Test
-    void testAssignArtifactErrorWithNonExistentArtifactId() throws Exception {
-        doThrow(new ObjectNotFoundException("artifact", "123")).when(wizardService).assignArtifact(any(), any());
-
-        mockMvc.perform(put(PATH + "/1/artifacts/1250808601744904192")
-                        .accept(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.flag").value(false))
-                .andExpect(jsonPath("$.code").value(StatusCode.NOT_FOUND))
-                .andExpect(jsonPath("$.message").value("Could not find artifact with Id 123"));
-        verify(wizardService, times(1)).assignArtifact(any(), any());
-
-    }
-
-    @Test
-    void testAssignArtifactErrorWithNonExistentWizardId() throws Exception {
-        doThrow(new ObjectNotFoundException("wizard", "123")).when(wizardService).assignArtifact(any(), any());
-
-        mockMvc.perform(put(PATH + "/1/artifacts/1250808601744904192")
-                        .accept(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.flag").value(false))
-                .andExpect(jsonPath("$.code").value(StatusCode.NOT_FOUND))
-                .andExpect(jsonPath("$.message").value("Could not find wizard with Id 123"));
-        verify(wizardService, times(1)).assignArtifact(any(), any());
-
-    }
-
-    @Test
     void testDeleteWizardSuccess() throws Exception {
         int wizardId = 1;
         doNothing().when(wizardService).delete(wizardId);
@@ -283,18 +244,71 @@ class WizardControllerTest {
         verify(wizardService).delete(wizardId);
     }
 
-    private void setWizardsData() {
-        Artifact a1 = new Artifact();
-        a1.setId("1250808601744904191");
-        a1.setName("Deluminator");
-        a1.setDescription("A Deluminator is a device invented by Albus Dumbledore that resembles a cigarette lighter. It is used to remove or absorb (as well as return) the light from any light source to provide cover to the user.");
-        a1.setImageUrl("imageUrl");
+    @Test
+    void testAssignArtifactSuccess() throws Exception {
+        int wizardId = 1;
+        String artifactId = "1250808601744904192";
+        String endpoint = "/" + wizardId + "/artifacts/" + artifactId;
 
-        Artifact a2 = new Artifact();
-        a2.setId("1250808601744904192");
-        a2.setName("Invisibility Cloak");
-        a2.setDescription("An invisibility cloak is used to make the wearer invisible.");
-        a2.setImageUrl("imageUrl");
+        doNothing().when(wizardService).assignArtifact(wizardId, artifactId);
+
+        // endpoint = wizards/{wizardId}/artifacts/{artifactId}
+        mockMvc.perform(put(PATH + endpoint)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.flag").value(true))
+                .andExpect(jsonPath("$.code").value(StatusCode.SUCCESS))
+                .andExpect(jsonPath("$.message").value("Artifact Assignment Success"));
+        verify(wizardService, times(1)).assignArtifact(wizardId, artifactId);
+    }
+
+    @Test
+    void testAssignArtifactErrorWithNonExistentArtifactId() throws Exception {
+        int wizardId = 1;
+        String artifactId = "1250808601744904192";
+        String endpoint = "/" + wizardId + "/artifacts/" + artifactId;
+
+        doThrow(new ObjectNotFoundException("artifact", "123")).when(wizardService).assignArtifact(wizardId, artifactId);
+
+        mockMvc.perform(put(PATH + endpoint)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.flag").value(false))
+                .andExpect(jsonPath("$.code").value(StatusCode.NOT_FOUND))
+                .andExpect(jsonPath("$.message").value("Could not find artifact with Id 123"));
+        verify(wizardService, times(1)).assignArtifact(wizardId, artifactId);
+
+    }
+
+    @Test
+    void testAssignArtifactErrorWithNonExistentWizardId() throws Exception {
+        int wizardId = 1;
+        String artifactId = "1250808601744904192";
+        String endpoint = "/" + wizardId + "/artifacts/" + artifactId;
+        doThrow(new ObjectNotFoundException("wizard", "123")).when(wizardService).assignArtifact(wizardId, artifactId);
+
+        mockMvc.perform(put(PATH + endpoint)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.flag").value(false))
+                .andExpect(jsonPath("$.code").value(StatusCode.NOT_FOUND))
+                .andExpect(jsonPath("$.message").value("Could not find wizard with Id 123"));
+        verify(wizardService, times(1)).assignArtifact(wizardId, artifactId);
+
+    }
+
+    private void setWizardsData() {
+
+        Artifact a1 = Artifact.builder()
+                .id("1250808601744904191")
+                .name("Deluminator")
+                .description("A Deluminator is a device invented by Albus Dumbledore that resembles a cigarette lighter")
+                .imageUrl("imageUrl")
+                .build();
+
+        Artifact a2 = Artifact.builder()
+                .id("1250808601744904192")
+                .name("Invisibility Cloak")
+                .description("An invisibility cloak is used to make the wearer invisible.")
+                .imageUrl("imageUrl")
+                .build();
 
         Wizard wizard1 = Wizard.builder()
                 .id(1)

@@ -16,8 +16,7 @@ import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
 
@@ -131,34 +130,6 @@ class WizardServiceTest {
     }
 
     @Test
-    void testAssignArtifactSuccess() {
-        String artifactId = "1250808601744904191";
-        int wizardId = 1;
-
-        Artifact artifact = Artifact.builder()
-                .id(artifactId)
-                .name("Deluminator")
-                .imageUrl("imageUrl")
-                .build();
-
-        List<Artifact> artifacts = new ArrayList<>();
-        artifacts.add(artifact);
-
-        Wizard wizard = Wizard.builder()
-                .id(1)
-                .name("Albus Dumbledore")
-                .artifacts(artifacts)
-                .build();
-
-        given(artifactRepository.findById(artifactId)).willReturn(Optional.of(artifact));
-        given(wizardRepository.findById(wizardId)).willReturn(Optional.of(wizard));
-        wizardService.assignArtifact(wizardId, artifactId);
-
-        verify(artifactRepository).findById(artifactId);
-        verify(wizardRepository).findById(wizardId);
-    }
-
-    @Test
     void testDeleteSuccess() {
         int wizardId = 1;
         given(wizardRepository.findById(wizardId)).willReturn(Optional.of(wizards.get(0)));
@@ -182,6 +153,73 @@ class WizardServiceTest {
                 .hasMessageContaining("Could not find wizard with Id 1");
 
         verify(wizardRepository, times(0)).deleteById(wizardId);
+    }
+
+    @Test
+    void testAssignArtifactSuccess() {
+        Artifact a = new Artifact();
+        a.setId("1250808601744904192");
+        a.setName("Invisibility Cloak");
+        a.setDescription("An invisibility cloak is used to make the wearer invisible.");
+        a.setImageUrl("ImageUrl");
+
+        Wizard w2 = new Wizard();
+        w2.setId(2);
+        w2.setName("Harry Potter");
+        w2.addArtifact(a);
+
+        Wizard w3 = new Wizard();
+        w3.setId(3);
+        w3.setName("Neville Longbottom");
+
+        given(this.artifactRepository.findById("1250808601744904192")).willReturn(Optional.of(a));
+        given(this.wizardRepository.findById(3)).willReturn(Optional.of(w3));
+
+        this.wizardService.assignArtifact(3, "1250808601744904192");
+
+        assertThat(a.getOwner().getId()).isEqualTo(3);
+        assertThat(w3.getArtifacts()).contains(a);
+    }
+
+
+    @Test
+    void testAssignArtifactErrorWithNonExistentWizardId() {
+        Artifact a = new Artifact();
+        a.setId("1250808601744904192");
+        a.setName("Invisibility Cloak");
+        a.setDescription("An invisibility cloak is used to make the wearer invisible.");
+        a.setImageUrl("ImageUrl");
+
+        Wizard w2 = new Wizard();
+        w2.setId(2);
+        w2.setName("Harry Potter");
+        w2.addArtifact(a);
+
+        given(this.artifactRepository.findById("1250808601744904192")).willReturn(Optional.of(a));
+        given(this.wizardRepository.findById(3)).willReturn(Optional.empty());
+
+        Throwable thrown = assertThrows(ObjectNotFoundException.class, () -> {
+            this.wizardService.assignArtifact(3, "1250808601744904192");
+        });
+
+        assertThat(thrown)
+                .isInstanceOf(ObjectNotFoundException.class)
+                .hasMessage("Could not find wizard with Id 3");
+        assertThat(a.getOwner().getId()).isEqualTo(2);
+    }
+
+    @Test
+    void testAssignArtifactErrorWithNonExistentArtifactId() {
+
+        given(this.artifactRepository.findById("1250808601744904192")).willReturn(Optional.empty());
+
+        Throwable thrown = assertThrows(ObjectNotFoundException.class, () -> {
+            this.wizardService.assignArtifact(3, "1250808601744904192");
+        });
+
+        assertThat(thrown)
+                .isInstanceOf(ObjectNotFoundException.class)
+                .hasMessage("Could not find artifact with Id 1250808601744904192");
     }
 
 
@@ -218,7 +256,6 @@ class WizardServiceTest {
         wizards.add(wizard1);
         wizards.add(wizard2);
         wizards.add(wizard3);
-
     }
 
 }
