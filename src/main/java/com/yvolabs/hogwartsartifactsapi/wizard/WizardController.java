@@ -85,19 +85,6 @@ public class WizardController {
 
     }
 
-    @PutMapping("/{wizardId}/artifacts/{artifactId}")
-    public ResponseEntity<Result> assignArtifact(@PathVariable Integer wizardId, @PathVariable String artifactId) {
-        wizardService.assignArtifact(wizardId, artifactId);
-
-        Result result = Result.builder()
-                .flag(true)
-                .code(StatusCode.SUCCESS)
-                .message("Artifact Assignment Success")
-                .build();
-
-        return ResponseEntity.ok(result);
-    }
-
     @DeleteMapping("/{wizardId}")
     public ResponseEntity<Result> deleteWizardById(@PathVariable Integer wizardId) {
         wizardService.delete(wizardId);
@@ -108,5 +95,17 @@ public class WizardController {
                 .message("Delete Success")
                 .build());
     }
+
+    @PutMapping("/{wizardId}/artifacts/{artifactId}")
+    public ResponseEntity<Result> assignArtifact(@PathVariable Integer wizardId, @PathVariable String artifactId) {
+        wizardService.assignArtifact(wizardId, artifactId);
+
+        return ResponseEntity.ok(Result.builder()
+                .flag(true)
+                .code(StatusCode.SUCCESS)
+                .message("Artifact Assignment Success")
+                .build());
+    }
+
 
 }

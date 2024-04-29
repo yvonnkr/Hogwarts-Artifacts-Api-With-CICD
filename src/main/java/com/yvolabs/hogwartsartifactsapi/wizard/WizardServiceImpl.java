@@ -46,18 +46,6 @@ public class WizardServiceImpl implements WizardService {
 
     }
 
-
-    @Override
-    public void assignArtifact(Integer wizardId, String artifactId) {
-        Artifact artifact = artifactRepository.findById(artifactId)
-                .orElseThrow(() -> new ObjectNotFoundException("artifact", artifactId));
-
-        Wizard wizard = wizardRepository.findById(wizardId)
-                .orElseThrow(() -> new ObjectNotFoundException("wizard", wizardId));
-
-        wizard.addArtifact(artifact);
-    }
-
     @Override
     public void delete(Integer wizardId) {
         Wizard wizardTobeDeleted = wizardRepository.findById(wizardId)
@@ -68,4 +56,21 @@ public class WizardServiceImpl implements WizardService {
         wizardRepository.deleteById(wizardId);
 
     }
+
+    @Override
+    public void assignArtifact(Integer wizardId, String artifactId) {
+        Artifact artifactToBeAssigned = this.artifactRepository.findById(artifactId)
+                .orElseThrow(() -> new ObjectNotFoundException("artifact", artifactId));
+
+        Wizard wizard = this.wizardRepository.findById(wizardId)
+                .orElseThrow(() -> new ObjectNotFoundException("wizard", wizardId));
+
+        // Artifact assignment
+        // We need to see if the artifact is already owned by some wizard.
+        if (artifactToBeAssigned.getOwner() != null) {
+            artifactToBeAssigned.getOwner().removeArtifact(artifactToBeAssigned);
+        }
+        wizard.addArtifact(artifactToBeAssigned);
+    }
+
 }
