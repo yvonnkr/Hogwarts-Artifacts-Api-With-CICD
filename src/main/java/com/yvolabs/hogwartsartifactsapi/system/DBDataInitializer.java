@@ -3,7 +3,7 @@ package com.yvolabs.hogwartsartifactsapi.system;
 import com.yvolabs.hogwartsartifactsapi.artifact.Artifact;
 import com.yvolabs.hogwartsartifactsapi.artifact.ArtifactRepository;
 import com.yvolabs.hogwartsartifactsapi.hogwartsuser.HogwartsUser;
-import com.yvolabs.hogwartsartifactsapi.hogwartsuser.UserRepository;
+import com.yvolabs.hogwartsartifactsapi.hogwartsuser.UserService;
 import com.yvolabs.hogwartsartifactsapi.wizard.Wizard;
 import com.yvolabs.hogwartsartifactsapi.wizard.WizardRepository;
 import lombok.RequiredArgsConstructor;
@@ -18,7 +18,7 @@ import org.springframework.context.annotation.Configuration;
 public class DBDataInitializer implements CommandLineRunner {
     private final ArtifactRepository artifactRepository;
     private final WizardRepository wizardRepository;
-    private final UserRepository userRepository;
+    private final UserService userService;
 
     @Override
     public void run(String... args) throws Exception {
@@ -103,8 +103,9 @@ public class DBDataInitializer implements CommandLineRunner {
         u3.setEnabled(false);
         u3.setRoles("user");
 
-        this.userRepository.save(u1);
-        this.userRepository.save(u2);
-        this.userRepository.save(u3);
+        this.userService.save(u1);
+        this.userService.save(u2);
+        this.userService.save(u3);
+
     }
 }
