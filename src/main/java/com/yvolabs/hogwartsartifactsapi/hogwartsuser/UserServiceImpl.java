@@ -2,6 +2,10 @@ package com.yvolabs.hogwartsartifactsapi.hogwartsuser;
 
 import com.yvolabs.hogwartsartifactsapi.system.exception.ObjectNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -11,8 +15,9 @@ import java.util.List;
  */
 @Service
 @RequiredArgsConstructor
-public class UserServiceImpl implements UserService {
+public class UserServiceImpl implements UserService, UserDetailsService {
     private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
 
     @Override
     public List<HogwartsUser> findAll() {
@@ -21,6 +26,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public HogwartsUser save(HogwartsUser user) {
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
         return userRepository.save(user);
     }
 
@@ -50,5 +56,13 @@ public class UserServiceImpl implements UserService {
         userRepository.findById(userId)
                 .orElseThrow(() -> new ObjectNotFoundException("user", userId));
         userRepository.deleteById(userId);
+    }
+
+    @Override
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        return userRepository.findByUsername(username)
+                .map(MyUserPrincipal::new)
+                .orElseThrow(() -> new UsernameNotFoundException("username " + username + " was not found."));
+
     }
 }
