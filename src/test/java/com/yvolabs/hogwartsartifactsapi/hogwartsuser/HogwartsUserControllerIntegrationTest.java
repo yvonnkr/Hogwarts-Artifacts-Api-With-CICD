@@ -246,7 +246,7 @@ class HogwartsUserControllerIntegrationTest {
         this.mockMvc.perform(delete(this.baseUrl + "/users/2").accept(MediaType.APPLICATION_JSON).header(HttpHeaders.AUTHORIZATION, ericToken))
                 .andExpect(jsonPath("$.flag").value(false))
                 .andExpect(jsonPath("$.code").value(StatusCode.FORBIDDEN))
-                .andExpect(jsonPath("$.message").value("No permission"))
+                .andExpect(jsonPath("$.message").value("No permission to access this resource"))
                 .andExpect(jsonPath("$.data").value("Access Denied"));
 
         this.mockMvc.perform(get(this.baseUrl + "/users").accept(MediaType.APPLICATION_JSON).header(HttpHeaders.AUTHORIZATION, this.token))

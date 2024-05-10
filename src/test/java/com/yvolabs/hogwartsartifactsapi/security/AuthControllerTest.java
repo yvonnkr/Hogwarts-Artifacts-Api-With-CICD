@@ -78,7 +78,7 @@ class AuthControllerTest {
         mockMvc.perform(post(PATH + "/login"))
                 .andExpect(jsonPath("$.flag").value(false))
                 .andExpect(jsonPath("$.code").value(StatusCode.UNAUTHORIZED))
-                .andExpect(jsonPath("$.message").value("Full authentication is required to access this resource"))
+                .andExpect(jsonPath("$.message").value("Login credentials are missing"))
                 .andExpect(jsonPath("$.data").value("Full authentication is required to access this resource"));
     }
 }

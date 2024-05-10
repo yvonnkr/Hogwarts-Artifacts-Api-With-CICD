@@ -96,9 +96,10 @@ public class ExceptionHandlerAdvice {
         return Result.builder()
                 .flag(false)
                 .code(StatusCode.FORBIDDEN)
-                .message("No permission")
+                .message("No permission to access this resource")
                 .data(ex.getMessage())
                 .build();
+
     }
 
     @ExceptionHandler(InsufficientAuthenticationException.class)
@@ -107,7 +108,7 @@ public class ExceptionHandlerAdvice {
         return Result.builder()
                 .flag(false)
                 .code(StatusCode.UNAUTHORIZED)
-                .message("Full authentication is required to access this resource")
+                .message("Login credentials are missing")
                 .data(ex.getMessage())
                 .build();
     }
