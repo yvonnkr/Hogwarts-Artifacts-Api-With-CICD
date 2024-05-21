@@ -5,6 +5,7 @@ import com.yvolabs.hogwartsartifactsapi.artifact.converter.ArtifactToArtifactDto
 import com.yvolabs.hogwartsartifactsapi.artifact.dto.ArtifactDto;
 import com.yvolabs.hogwartsartifactsapi.system.Result;
 import com.yvolabs.hogwartsartifactsapi.system.StatusCode;
+import io.micrometer.core.instrument.MeterRegistry;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -22,10 +23,16 @@ public class ArtifactController {
     private final ArtifactService artifactService;
     private final ArtifactToArtifactDtoConverter artifactToArtifactDtoConverter;
     private final ArtifactDtoToArtifactConverter artifactDtoToArtifactConverter;
+    private final MeterRegistry meterRegistry;
 
     @GetMapping("/{artifactId}")
     public ResponseEntity<Result> findArtifactById(@PathVariable String artifactId) {
-        ArtifactDto artifactDto = artifactToArtifactDtoConverter.convert(artifactService.findById(artifactId));
+        Artifact foundArtifact = artifactService.findById(artifactId);
+
+        // custom metric example
+        meterRegistry.counter("artifacts.id." + artifactId).increment();
+
+        ArtifactDto artifactDto = artifactToArtifactDtoConverter.convert(foundArtifact);
         Result result = Result.builder()
                 .flag(true)
                 .code(StatusCode.SUCCESS)

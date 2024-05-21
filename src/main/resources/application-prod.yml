@@ -1,0 +1,26 @@
+spring:
+  datasource:
+    url: jdbc:h2:mem:hogwarts
+    username: sa
+    password:
+    driver-class-name: org.h2.Driver
+
+
+# Config if using azure key vault, and azure mysql db, note need to add azure dependency
+
+#spring:
+#  cloud:
+#    azure:
+#      keyvault:
+#        secret:
+#          property-sources[0]:
+#            endpoint: ${AZURE_KEY_VAULT_ENDPOINT} # environment variable
+#  datasource:
+#    url: ${datasource-url} # secret from Azure Key Vault
+#    username: ${datasource-username} # secret from Azure Key Vault
+#    password: ${datasource-password} # secret from Azure Key Vault
+#  jpa:
+#    hibernate:
+#      ddl-auto: none # Turn off the DDL auto generation.
+#
+#

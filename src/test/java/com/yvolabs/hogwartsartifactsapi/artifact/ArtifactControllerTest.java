@@ -4,6 +4,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.yvolabs.hogwartsartifactsapi.artifact.dto.ArtifactDto;
 import com.yvolabs.hogwartsartifactsapi.system.StatusCode;
 import com.yvolabs.hogwartsartifactsapi.system.exception.ObjectNotFoundException;
+import io.micrometer.core.instrument.Counter;
+import io.micrometer.core.instrument.MeterRegistry;
 import lombok.extern.slf4j.Slf4j;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeEach;
@@ -13,8 +15,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -31,9 +35,16 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 /**
  * @author Yvonne N
+ * Typically @WebMvcTest is used in combination with @MockBean or @Import to create any collaborators required by your @Controller beans.
+ * If you are looking to load your full application configuration and use MockMVC,
+ * you should consider @SpringBootTest combined with @AutoConfigureMockMvc rather than this annotation.
+ *
+ * In this case sw
  */
-@WebMvcTest(controllers = ArtifactController.class)
-@AutoConfigureMockMvc(addFilters = false) //disable spring security as this is unit test, tested in integration tests instead
+//@WebMvcTest(controllers = ArtifactController.class)
+@SpringBootTest
+@AutoConfigureMockMvc(addFilters = false) // Turn off Spring Security
+@ActiveProfiles(value = "dev")
 @Slf4j
 class ArtifactControllerTest {
     @Autowired
@@ -42,13 +53,16 @@ class ArtifactControllerTest {
     @MockBean
     ArtifactService artifactService;
 
+//    @MockBean
+//    MeterRegistry meterRegistry; // not needed if using @SpringBootTest instead of @WebMvcTest
+
     @Autowired
     ObjectMapper objectMapper;
 
     List<Artifact> artifacts;
 
     @Value("${api.endpoint.base-url}/artifacts")
-    private String PATH ;
+    private String PATH;
 
     @BeforeEach
     void setUp() {
@@ -59,6 +73,9 @@ class ArtifactControllerTest {
     void tesFindArtifactByIdSuccess() throws Exception {
         String artifactId = "1250808601744904191";
         given(artifactService.findById(artifactId)).willReturn(artifacts.get(0));
+
+//        Counter mockedCounter = mock(Counter.class);
+//        given(meterRegistry.counter(any())).willReturn(mockedCounter);
 
         mockMvc.perform(get(PATH + "/" + artifactId).accept(MediaType.APPLICATION_JSON))
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
@@ -72,7 +89,7 @@ class ArtifactControllerTest {
     @Test
     void testFindArtifactByIdNotFound() throws Exception {
         String artifactId = "1250808601744904191";
-        given(artifactService.findById(artifactId)).willThrow(new ObjectNotFoundException("artifact",artifactId));
+        given(artifactService.findById(artifactId)).willThrow(new ObjectNotFoundException("artifact", artifactId));
 
         // When and then
         mockMvc.perform(get(PATH + "/" + artifactId).accept(MediaType.APPLICATION_JSON))
@@ -205,7 +222,7 @@ class ArtifactControllerTest {
 
         String json = this.objectMapper.writeValueAsString(artifactDto);
 
-        given(this.artifactService.update(eq(artifactId), Mockito.any(Artifact.class))).willThrow(new ObjectNotFoundException("artifact",artifactId));
+        given(this.artifactService.update(eq(artifactId), Mockito.any(Artifact.class))).willThrow(new ObjectNotFoundException("artifact", artifactId));
 
         this.mockMvc.perform(put(PATH + "/" + artifactId)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -265,7 +282,7 @@ class ArtifactControllerTest {
     @Test
     void testDeleteArtifactErrorWithNonExistentId() throws Exception {
         String artifactId = "1250808601744904191";
-        doThrow(new ObjectNotFoundException("artifact",artifactId)).when(artifactService).delete(eq(artifactId));
+        doThrow(new ObjectNotFoundException("artifact", artifactId)).when(artifactService).delete(eq(artifactId));
 
         mockMvc.perform(delete(PATH + "/" + artifactId).accept(MediaType.APPLICATION_JSON))
                 .andExpect(result -> assertInstanceOf(ObjectNotFoundException.class, result.getResolvedException()))

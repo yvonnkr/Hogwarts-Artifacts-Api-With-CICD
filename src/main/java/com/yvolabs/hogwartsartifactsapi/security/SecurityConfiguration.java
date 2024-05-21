@@ -7,6 +7,7 @@ import com.nimbusds.jose.jwk.source.ImmutableJWKSet;
 import com.nimbusds.jose.jwk.source.JWKSource;
 import com.nimbusds.jose.proc.SecurityContext;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.actuate.autoconfigure.security.servlet.EndpointRequest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -69,10 +70,15 @@ public class SecurityConfiguration {
                 .authorizeHttpRequests((authorizeRequests) -> {
                     authorizeRequests
                             .requestMatchers(HttpMethod.GET, baseurl + "/artifacts/**").permitAll()
+                            //users
                             .requestMatchers(HttpMethod.GET, baseurl + "/users/**").hasAuthority("ROLE_admin")
                             .requestMatchers(HttpMethod.POST, baseurl + "/users").hasAuthority("ROLE_admin")
                             .requestMatchers(HttpMethod.PUT, baseurl + "/users/**").hasAuthority("ROLE_admin")
                             .requestMatchers(HttpMethod.DELETE, baseurl + "/users/**").hasAuthority("ROLE_admin")
+                            //actuator
+                            .requestMatchers(EndpointRequest.to("health", "info")).permitAll()
+                            .requestMatchers(EndpointRequest.toAnyEndpoint().excluding("health", "info")).hasAuthority("ROLE_admin")
+                            //h2
                             .requestMatchers(AntPathRequestMatcher.antMatcher("/h2-console/**")).permitAll()
                             .anyRequest().authenticated(); //disallow all other requests
                 })

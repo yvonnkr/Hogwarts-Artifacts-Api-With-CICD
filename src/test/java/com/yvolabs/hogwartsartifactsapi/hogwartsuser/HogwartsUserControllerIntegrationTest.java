@@ -285,7 +285,7 @@ class HogwartsUserControllerIntegrationTest {
     void testInternalServerError() throws Exception {
         this.mockMvc.perform(get(this.baseUrl + "/invalidEndpoint").accept(MediaType.APPLICATION_JSON).header(HttpHeaders.AUTHORIZATION, this.token))
                 .andExpect(jsonPath("$.flag").value(false))
-                .andExpect(jsonPath("$.code").value(StatusCode.UNAUTHORIZED))
-                .andExpect(jsonPath("$.message").value("A server internal error occurred."));
+                .andExpect(jsonPath("$.code").value(StatusCode.NOT_FOUND))
+                .andExpect(jsonPath("$.message").value("This API endpoint was not found"));
     }
 }
