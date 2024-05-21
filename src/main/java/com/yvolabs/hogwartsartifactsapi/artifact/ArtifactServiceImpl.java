@@ -2,8 +2,10 @@ package com.yvolabs.hogwartsartifactsapi.artifact;
 
 import com.yvolabs.hogwartsartifactsapi.system.exception.ObjectNotFoundException;
 import com.yvolabs.hogwartsartifactsapi.utils.IdWorker;
+import io.micrometer.core.annotation.Timed;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -14,6 +16,7 @@ import java.util.List;
 @Service
 @Transactional
 @RequiredArgsConstructor
+@Slf4j
 public class ArtifactServiceImpl implements ArtifactService {
     private final ArtifactRepository artifactRepository;
     private final IdWorker idWorker;
@@ -26,7 +29,15 @@ public class ArtifactServiceImpl implements ArtifactService {
     }
 
     @Override
+    @Timed("findAllArtifactsService.time") // actuator metrics - measure the latency of this method
     public List<Artifact> findAll() {
+
+        // set logger test
+        // POST actuator/loggers/com.yvolabs.hogwartsartifactsapi.artifact.ArtifactServiceImpl
+        // {"configuredLevel": "DEBUG" or null}
+        log.info("logging-info");
+        log.debug("logging-debug");
+
         return artifactRepository.findAll();
     }
 

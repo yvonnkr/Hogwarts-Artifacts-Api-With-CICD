@@ -1,11 +1,8 @@
 spring:
   application:
     name: hogwarts-artifacts-api
-  datasource:
-    url: jdbc:h2:mem:hogwarts
-    username: sa
-    password:
-    driver-class-name: org.h2.Driver
+  profiles:
+    active: dev # By default, the active profile is "dev". During production, it will be replaced to "prod" due to Azure's environment variables.
 
 # custom properties - to access example @Value("${api.endpoint.base-url}")
 api:
@@ -14,3 +11,50 @@ api:
 
 server:
   port: 80
+
+# Actuator
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,env,beans,configprops,heapdump,httpexchanges,loggers,mappings,custom-beans
+  endpoint:
+    health:
+      show-details: always
+      probes:
+        enabled: true
+        # can also add custom health indicator, E.G Checking the usable disk space - UsableMemoryHealthIndicator.class
+    env:
+      show-values: always
+    configprops:
+      show-values: always
+
+  info:
+    build:
+      enabled: true # pom.xml under maven plugin, add execution:goal, generated file = target/classes/META-INFO/build-info.properties
+    env:
+      enabled: true
+    git:
+      enabled: true
+      mode: simple # pom.xml add git plugin, run with ./mvnw spring-boot:run, generated file = target/classes/git.properties
+    java:
+      enabled: true
+    os:
+      enabled: true
+  observations:
+    annotations:
+      enabled: true
+
+
+
+# info details to be consumed by actuator info endpoint
+info:
+  app:
+    name: hogwarts-artifacts-api
+    description: A web application that manages artifacts and wizards for Hogwarts School.
+    version: @project.version@
+    author: Yvonne N
+    links:
+      github: https://github.com/yvonnkr/Hogwarts-Artifacts-Api-With-CICD
+    # can also add via a custom class Info Contributor, E.G SystemInfoContributor.class
+
