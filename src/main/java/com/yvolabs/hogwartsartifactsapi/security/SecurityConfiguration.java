@@ -14,7 +14,6 @@ import org.springframework.http.HttpMethod;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
-import org.springframework.security.config.annotation.web.configurers.HeadersConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -82,16 +81,15 @@ public class SecurityConfiguration {
                             .requestMatchers(AntPathRequestMatcher.antMatcher("/h2-console/**")).permitAll()
                             .anyRequest().authenticated(); //disallow all other requests
                 })
-                .headers(headers -> headers.frameOptions(HeadersConfigurer.FrameOptionsConfig::sameOrigin).disable())//This is for h2 browser console access
+                .headers(headers -> headers.frameOptions(Customizer.withDefaults()).disable())//This is for h2 browser console access
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(Customizer.withDefaults())
                 .httpBasic(httpBasic -> httpBasic.authenticationEntryPoint(this.customBasicAuthenticationEntryPoint))
-                .oauth2ResourceServer((oauth2) ->
-                        oauth2.jwt(Customizer.withDefaults())
-                                .authenticationEntryPoint(this.customBearerTokenAuthenticationEntryPoint)
-                                .accessDeniedHandler(customBearerTokenAccessDeniedHandler)
+                .oauth2ResourceServer(oauth2ResourceServer -> oauth2ResourceServer
+                        .jwt(Customizer.withDefaults())
+                        .authenticationEntryPoint(this.customBearerTokenAuthenticationEntryPoint)
+                        .accessDeniedHandler(this.customBearerTokenAccessDeniedHandler)
                 )
-
                 .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) //turn off session management
                 .build();
 
