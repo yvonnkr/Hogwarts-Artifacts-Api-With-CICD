@@ -18,8 +18,8 @@ public class UsableMemoryHealthIndicator implements HealthIndicator {
         File path = new File("."); // Path used to compute available disk space  - (".") = root
         long diskUsableInBytes = path.getUsableSpace();
 
-        // long threshold = 10 * 1024 * 1024; // 10MB
-        long threshold = 1000000L * 1024 * 1024; // super large threshold to test DOWN status
+         long threshold = 10 * 1024 * 1024; // 10MB
+//        long threshold = 1000000L * 1024 * 1024; // super large threshold to test DOWN status
 
         boolean isHealthy = diskUsableInBytes >= threshold;
         Status status = isHealthy ? Status.UP : Status.DOWN; // Up means there is enough usable memory

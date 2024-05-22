@@ -9,6 +9,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.context.ActiveProfiles;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,6 +25,7 @@ import static org.mockito.Mockito.*;
  * @author Yvonne N
  */
 @ExtendWith(MockitoExtension.class)
+@ActiveProfiles(value = "dev")
 class WizardServiceTest {
     @Mock
     private WizardRepository wizardRepository;
@@ -198,9 +200,9 @@ class WizardServiceTest {
         given(this.artifactRepository.findById("1250808601744904192")).willReturn(Optional.of(a));
         given(this.wizardRepository.findById(3)).willReturn(Optional.empty());
 
-        Throwable thrown = assertThrows(ObjectNotFoundException.class, () -> {
-            this.wizardService.assignArtifact(3, "1250808601744904192");
-        });
+        Throwable thrown = assertThrows(ObjectNotFoundException.class, () ->
+                this.wizardService.assignArtifact(3, "1250808601744904192")
+        );
 
         assertThat(thrown)
                 .isInstanceOf(ObjectNotFoundException.class)
@@ -213,9 +215,9 @@ class WizardServiceTest {
 
         given(this.artifactRepository.findById("1250808601744904192")).willReturn(Optional.empty());
 
-        Throwable thrown = assertThrows(ObjectNotFoundException.class, () -> {
-            this.wizardService.assignArtifact(3, "1250808601744904192");
-        });
+        Throwable thrown = assertThrows(ObjectNotFoundException.class, () ->
+                this.wizardService.assignArtifact(3, "1250808601744904192")
+        );
 
         assertThat(thrown)
                 .isInstanceOf(ObjectNotFoundException.class)

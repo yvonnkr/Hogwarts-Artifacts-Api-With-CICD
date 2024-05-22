@@ -3,7 +3,6 @@ package com.yvolabs.hogwartsartifactsapi.security;
 
 import com.yvolabs.hogwartsartifactsapi.system.StatusCode;
 import org.hamcrest.Matchers;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
@@ -11,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.httpBasic;
@@ -24,16 +24,13 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc
 @DisplayName("Integration tests for Auth API endpoint")
 @Tag("Integration")
+@ActiveProfiles(value = "dev")
 class AuthControllerTest {
     @Autowired
     private MockMvc mockMvc;
 
     @Value("${api.endpoint.base-url}/users")
     String PATH;
-
-    @BeforeEach
-    void setUp() {
-    }
 
     @Test
     void testGetLoginInfoSuccess() throws Exception {
@@ -72,6 +69,7 @@ class AuthControllerTest {
                 .andExpect(jsonPath("$.message").value("User account is abnormal"))
                 .andExpect(jsonPath("$.data").value("User is disabled"));
     }
+
     @Test
     void testGetLoginInfoThrowsInsufficientAuthenticationExceptionWithNoUsernameAndPassword() throws Exception {
 

@@ -4,6 +4,11 @@ spring:
   profiles:
     active: dev # By default, the active profile is "dev". During production, it will be replaced to "prod" due to Azure's environment variables.
 
+# this property is deprecated used it to check project for errors/deprecations etc.
+#  mvc:
+#    throw-exception-if-no-handler-found: true
+
+
 # custom properties - to access example @Value("${api.endpoint.base-url}")
 api:
   endpoint:

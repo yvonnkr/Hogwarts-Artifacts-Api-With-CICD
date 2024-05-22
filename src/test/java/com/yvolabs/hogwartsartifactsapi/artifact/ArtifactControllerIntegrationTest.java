@@ -2,7 +2,6 @@ package com.yvolabs.hogwartsartifactsapi.artifact;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.yvolabs.hogwartsartifactsapi.system.StatusCode;
-import lombok.extern.slf4j.Slf4j;
 import org.hamcrest.Matchers;
 import org.json.JSONObject;
 import org.junit.jupiter.api.BeforeEach;
@@ -16,6 +15,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultActions;
@@ -32,6 +32,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc
 @DisplayName("Integration tests for Artifact API endpoints")
 @Tag("Integration")
+@ActiveProfiles(value = "dev")
 public class ArtifactControllerIntegrationTest {
     @Autowired
     private MockMvc mockMvc;
