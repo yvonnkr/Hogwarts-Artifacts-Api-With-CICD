@@ -76,8 +76,8 @@ public class SecurityConfiguration {
                             .requestMatchers(HttpMethod.PUT, baseurl + "/users/**").hasAuthority("ROLE_admin")
                             .requestMatchers(HttpMethod.DELETE, baseurl + "/users/**").hasAuthority("ROLE_admin")
                             //actuator
-                            .requestMatchers(EndpointRequest.to("health", "info")).permitAll()
-                            .requestMatchers(EndpointRequest.toAnyEndpoint().excluding("health", "info")).hasAuthority("ROLE_admin")
+                            .requestMatchers(EndpointRequest.to("health", "info", "prometheus")).permitAll()
+                            .requestMatchers(EndpointRequest.toAnyEndpoint().excluding("health", "info", "prometheus")).hasAuthority("ROLE_admin")
                             //h2
                             .requestMatchers(AntPathRequestMatcher.antMatcher("/h2-console/**")).permitAll()
                             .anyRequest().authenticated(); //disallow all other requests

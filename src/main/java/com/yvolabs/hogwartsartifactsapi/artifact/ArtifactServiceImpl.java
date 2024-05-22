@@ -3,6 +3,7 @@ package com.yvolabs.hogwartsartifactsapi.artifact;
 import com.yvolabs.hogwartsartifactsapi.system.exception.ObjectNotFoundException;
 import com.yvolabs.hogwartsartifactsapi.utils.IdWorker;
 import io.micrometer.core.annotation.Timed;
+import io.micrometer.observation.annotation.Observed;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -22,6 +23,7 @@ public class ArtifactServiceImpl implements ArtifactService {
     private final IdWorker idWorker;
 
     @Override
+    @Observed(name = "artifact", contextualName = "findByIdService")
     public Artifact findById(String artifactId) {
 
         return artifactRepository.findById(artifactId)
