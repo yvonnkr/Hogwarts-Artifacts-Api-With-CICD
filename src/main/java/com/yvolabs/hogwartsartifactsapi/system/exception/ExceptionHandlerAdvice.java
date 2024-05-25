@@ -1,8 +1,15 @@
 package com.yvolabs.hogwartsartifactsapi.system.exception;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.nimbusds.jose.shaded.gson.JsonObject;
+import com.nimbusds.jose.shaded.gson.JsonParser;
 import com.yvolabs.hogwartsartifactsapi.system.Result;
 import com.yvolabs.hogwartsartifactsapi.system.StatusCode;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.AccountStatusException;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -15,6 +22,9 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.HttpServerErrorException;
+import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.servlet.NoHandlerFoundException;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 
@@ -25,6 +35,7 @@ import java.util.List;
  * @author Yvonne N
  */
 @RestControllerAdvice
+@Slf4j
 public class ExceptionHandlerAdvice {
 
     @ExceptionHandler(ObjectNotFoundException.class)
@@ -115,8 +126,24 @@ public class ExceptionHandlerAdvice {
                 .build();
     }
 
-    // endpoint error
+    // Rest Client Error
+    @ExceptionHandler({HttpClientErrorException.class, HttpServerErrorException.class})
+    ResponseEntity<Result> handleRestClientException(HttpStatusCodeException ex) throws JsonProcessingException {
 
+//         String formattedExceptionMessage = getFormattedErrorMessageUsingJackson(ex);
+        String formattedExceptionMessage = getFormattedErrorMessageUsingGson(ex);
+
+        Result result = Result.builder()
+                .flag(false)
+                .code(ex.getStatusCode().value())
+                .message("A rest client error occurs, see data for details")
+                .data(formattedExceptionMessage)
+                .build();
+
+        return new ResponseEntity<>(result, ex.getStatusCode());
+    }
+
+    // endpoint errors
     @ExceptionHandler({NoHandlerFoundException.class, NoResourceFoundException.class})
     @ResponseStatus(HttpStatus.NOT_FOUND)
     Result handleNoHandlerFoundException(Exception ex) {
@@ -141,5 +168,54 @@ public class ExceptionHandlerAdvice {
                 .data(ex.getMessage())
                 .build();
     }
+
+    private String getFormattedErrorMessageUsingGson(HttpStatusCodeException ex) {
+        String exceptionMessage = ex.getMessage();
+
+        // Replace <EOL> with actual newline characters
+        exceptionMessage = exceptionMessage.replace("<EOL>", "\n");
+
+        // Extract the JSON part from the string.
+        String jsonString = exceptionMessage.substring(exceptionMessage.indexOf("{"), exceptionMessage.lastIndexOf("}") + 1);
+
+        // Parse JSON string
+        JsonObject jsonObject = JsonParser.parseString(jsonString).getAsJsonObject();
+
+        String formattedExceptionMessage = jsonObject
+                .getAsJsonObject("error")
+                .get("message")
+                .getAsString();
+
+        log.info("formattedExceptionMessage: {}", formattedExceptionMessage);
+
+        return formattedExceptionMessage;
+    }
+
+    private String getFormattedErrorMessageUsingJackson(HttpStatusCodeException ex) throws JsonProcessingException {
+
+        String exceptionMessage = ex.getMessage();
+
+        // Replace <EOL> with actual newlines.
+        exceptionMessage = exceptionMessage.replace("<EOL>", "\n");
+
+        // Extract the JSON part from the string.
+        String jsonPart = exceptionMessage.substring(exceptionMessage.indexOf("{"), exceptionMessage.lastIndexOf("}") + 1);
+        log.info("jsonPart = {} ", jsonPart);
+
+        // Create an ObjectMapper instance.
+        ObjectMapper objectMapper = new ObjectMapper();
+
+        // Parse the JSON string to a JsonNode.
+        JsonNode rootNode = objectMapper.readTree(jsonPart);
+        log.info("rootNode = {} ", rootNode);
+
+        // Extract the message.
+        String formattedExceptionMessage = rootNode.path("error").path("message").asText();
+        log.info("formattedExceptionMessage = {}", formattedExceptionMessage);
+
+        return formattedExceptionMessage;
+
+    }
+
 
 }

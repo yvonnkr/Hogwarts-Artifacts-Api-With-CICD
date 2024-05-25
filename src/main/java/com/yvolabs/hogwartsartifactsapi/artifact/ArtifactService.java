@@ -1,5 +1,8 @@
 package com.yvolabs.hogwartsartifactsapi.artifact;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.yvolabs.hogwartsartifactsapi.artifact.dto.ArtifactDto;
+
 import java.util.List;
 
 /**
@@ -15,4 +18,6 @@ public interface ArtifactService {
     Artifact update(String artifactId, Artifact update);
 
     void delete(String artifactId);
+
+    String summarize(List<ArtifactDto> artifactDtos) throws JsonProcessingException;
 }

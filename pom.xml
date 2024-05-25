@@ -78,6 +78,10 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-aop</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.google.code.gson</groupId>
+            <artifactId>gson</artifactId>
+        </dependency>
 
 <!--        USED TO CHECK FOR DEPRECATED CLASSES/METHODS/PROPERTIES ETC AFTER AN UPGRADE-->
 <!--        REMOVE THIS DEPENDENCY AFTER USE - SHOULD NOT BE USED IN PRODUCTION-->

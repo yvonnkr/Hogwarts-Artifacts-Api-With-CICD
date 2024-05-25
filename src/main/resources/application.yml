@@ -45,9 +45,10 @@ management:
       enabled: true
     os:
       enabled: true
-  tracing:
-    sampling:
-      probability: 1 # 1 Only for demo purpose, change it back to 0.1 in production
+# zipkin disabled - error thrown when docker container is not started
+#  tracing:
+#    sampling:
+#      probability: 1 # 1 Only for demo purpose, change it back to 0.1 in production
   observations:
     annotations:
       enabled: true
