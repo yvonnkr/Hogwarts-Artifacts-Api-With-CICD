@@ -4,3 +4,9 @@ spring:
     username: sa
     password:
     driver-class-name: org.h2.Driver
+
+# environment variable for dev set in intellij
+ai:
+  openai:
+    endpoint: ${AI_OPENAI_ENDPOINT:https://api.openai.com/v1/chat/completions} # env variable with a default value
+    api-key: ${AI_OPENAI_API_KEY:YOUR_API_KEY} # env variable with a default value

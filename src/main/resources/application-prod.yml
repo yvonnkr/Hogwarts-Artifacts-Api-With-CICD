@@ -5,6 +5,12 @@ spring:
     password:
     driver-class-name: org.h2.Driver
 
+# environment variable for prod set in azure
+ai:
+  openai:
+    endpoint: ${AI_OPENAI_ENDPOINT:https://api.openai.com/v1/chat/completions} # env variable with a default value
+    api-key: ${AI_OPENAI_API_KEY:YOUR_API_KEY} # env variable with a default value
+
 
 # Config if using azure key vault, and azure mysql db, note need to add azure dependency
 

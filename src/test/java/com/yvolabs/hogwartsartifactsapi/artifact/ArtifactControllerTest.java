@@ -14,11 +14,13 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.client.HttpClientErrorException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -71,6 +73,7 @@ class ArtifactControllerTest {
         String artifactId = "1250808601744904191";
         given(artifactService.findById(artifactId)).willReturn(artifacts.get(0));
 
+// not needed if using @SpringBootTest instead of @WebMvcTest
 //        Counter mockedCounter = mock(Counter.class);
 //        given(meterRegistry.counter(any())).willReturn(mockedCounter);
 
@@ -288,6 +291,102 @@ class ArtifactControllerTest {
                 .andExpect(jsonPath("$.message").value("Could not find artifact with Id " + artifactId))
                 .andExpect(jsonPath("$.data").isEmpty());
 
+    }
+
+    @Test
+    void testSummarizeArtifactsSuccess() throws Exception {
+        // Given
+        given(artifactService.summarize(Mockito.anyList())).willReturn("The summary includes six artifacts, owned by three different wizards.");
+
+        // Then and When
+        mockMvc.perform(get(PATH + "/summary").accept(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.flag").value(true))
+                .andExpect(jsonPath("$.code").value(StatusCode.SUCCESS))
+                .andExpect(jsonPath("$.message").value("Summarize Success"))
+                .andExpect(jsonPath("$.data").value("The summary includes six artifacts, owned by three different wizards."));
+    }
+
+    /**
+     * This test simulates receiving a 401 Unauthorized response.
+     */
+    @Test
+    void testSummarizeArtifactsThrowsUnauthorizedError() throws Exception {
+        // Given
+        String errorMessageJson = "{\"error\":{\"message\":\"You didn't provide an API key\"}}";
+        HttpClientErrorException httpClientErrorException = HttpClientErrorException.create(HttpStatus.UNAUTHORIZED, errorMessageJson, null, null, null);
+
+        doThrow(httpClientErrorException).when(artifactService).summarize(Mockito.anyList());
+
+        // Then and When
+        mockMvc.perform(get(PATH + "/summary").accept(MediaType.APPLICATION_JSON))
+                .andExpect(result -> assertInstanceOf(HttpClientErrorException.class, result.getResolvedException()))
+                .andExpect(jsonPath("$.flag").value(false))
+                .andExpect(jsonPath("$.code").value(StatusCode.UNAUTHORIZED))
+                .andExpect(jsonPath("$.message").value("A rest client error occurs, see data for details"))
+                .andExpect(jsonPath("$.data").value("You didn't provide an API key"));
+    }
+
+    /**
+     * This test simulates a scenario where the service receives a 429 Quota Exceeded response.
+     */
+    @Test
+    void testSummarizeArtifactsThrowsQuotaExceeded() throws Exception {
+        // Given
+        String errorMessageJson = "{\"error\":{\"message\":\"You exceeded your current quota, please check your plan and billing details\"}}";
+        HttpClientErrorException httpClientErrorException = HttpClientErrorException.create(
+                HttpStatus.TOO_MANY_REQUESTS, errorMessageJson, null, null, null);
+
+        doThrow(httpClientErrorException).when(artifactService).summarize(Mockito.anyList());
+
+        // Then and When
+        mockMvc.perform(get(PATH + "/summary").accept(MediaType.APPLICATION_JSON))
+                .andExpect(result -> assertInstanceOf(HttpClientErrorException.class, result.getResolvedException()))
+                .andExpect(jsonPath("$.flag").value(false))
+                .andExpect(jsonPath("$.code").value(StatusCode.TOO_MANY_REQUESTS))
+                .andExpect(jsonPath("$.message").value("A rest client error occurs, see data for details"))
+                .andExpect(jsonPath("$.data").value("You exceeded your current quota, please check your plan and billing details"));
+    }
+
+    /**
+     * This test simulates receiving a 500 Internal Server Error response.
+     */
+    @Test
+    void testSummarizeArtifactsThrowsInternalServerError() throws Exception {
+        // Given
+        String errorMessageJson = "{\"error\":{\"message\":\"The server had an error while processing your request\"}}";
+        HttpClientErrorException httpClientErrorException = HttpClientErrorException.create(
+                HttpStatus.INTERNAL_SERVER_ERROR, errorMessageJson, null, null, null);
+
+        doThrow(httpClientErrorException).when(artifactService).summarize(Mockito.anyList());
+
+        // Then and When
+        mockMvc.perform(get(PATH + "/summary").accept(MediaType.APPLICATION_JSON))
+                .andExpect(result -> assertInstanceOf(HttpClientErrorException.class, result.getResolvedException()))
+                .andExpect(jsonPath("$.flag").value(false))
+                .andExpect(jsonPath("$.code").value(StatusCode.INTERNAL_SERVER_ERROR))
+                .andExpect(jsonPath("$.message").value("A rest client error occurs, see data for details"))
+                .andExpect(jsonPath("$.data").value("The server had an error while processing your request"));
+    }
+
+    /**
+     * This test simulates receiving a 503 Service Unavailable response.
+     */
+    @Test
+    void testSummarizeArtifactsThrowsServiceUnavailableError() throws Exception {
+        // Given
+        String errorMessageJson = "{\"error\":{\"message\":\"The server is currently overloaded, please try again later\"}}";
+        HttpClientErrorException httpClientErrorException = HttpClientErrorException.create(
+                HttpStatus.SERVICE_UNAVAILABLE, errorMessageJson, null, null, null);
+
+        doThrow(httpClientErrorException).when(artifactService).summarize(Mockito.anyList());
+
+        // Then and When
+        mockMvc.perform(get(PATH + "/summary").accept(MediaType.APPLICATION_JSON))
+                .andExpect(result -> assertInstanceOf(HttpClientErrorException.class, result.getResolvedException()))
+                .andExpect(jsonPath("$.flag").value(false))
+                .andExpect(jsonPath("$.code").value(StatusCode.SERVICE_UNAVAILABLE))
+                .andExpect(jsonPath("$.message").value("A rest client error occurs, see data for details"))
+                .andExpect(jsonPath("$.data").value("The server is currently overloaded, please try again later"));
     }
 
     private void setArtifactsData() {

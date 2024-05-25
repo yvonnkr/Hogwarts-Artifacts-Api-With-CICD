@@ -1,5 +1,6 @@
 package com.yvolabs.hogwartsartifactsapi.artifact;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.yvolabs.hogwartsartifactsapi.artifact.converter.ArtifactDtoToArtifactConverter;
 import com.yvolabs.hogwartsartifactsapi.artifact.converter.ArtifactToArtifactDtoConverter;
 import com.yvolabs.hogwartsartifactsapi.artifact.dto.ArtifactDto;
@@ -95,5 +96,23 @@ public class ArtifactController {
                 .data(null)
                 .build());
 
+    }
+
+    @GetMapping("/summary")
+    // Use with Caution: This endpoint when successfully called will incur a charge from open-ai
+    public Result summarizeArtifacts() throws JsonProcessingException {
+        List<Artifact> foundArtifacts = artifactService.findAll();
+        List<ArtifactDto> artifactDtos = foundArtifacts.stream()
+                .map(artifactToArtifactDtoConverter::convert)
+                .toList();
+
+        String artifactSummary = artifactService.summarize(artifactDtos);
+
+        return Result.builder()
+                .flag(true)
+                .code(StatusCode.SUCCESS)
+                .message("Summarize Success")
+                .data(artifactSummary)
+                .build();
     }
 }

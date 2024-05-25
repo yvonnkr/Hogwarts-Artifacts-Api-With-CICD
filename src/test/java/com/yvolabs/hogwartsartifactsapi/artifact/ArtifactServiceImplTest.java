@@ -1,8 +1,17 @@
 package com.yvolabs.hogwartsartifactsapi.artifact;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.yvolabs.hogwartsartifactsapi.artifact.dto.ArtifactDto;
+import com.yvolabs.hogwartsartifactsapi.client.ai.chat.ChatClient;
+import com.yvolabs.hogwartsartifactsapi.client.ai.chat.dto.ChatRequest;
+import com.yvolabs.hogwartsartifactsapi.client.ai.chat.dto.ChatResponse;
+import com.yvolabs.hogwartsartifactsapi.client.ai.chat.dto.Choice;
+import com.yvolabs.hogwartsartifactsapi.client.ai.chat.dto.Message;
 import com.yvolabs.hogwartsartifactsapi.system.exception.ObjectNotFoundException;
 import com.yvolabs.hogwartsartifactsapi.utils.IdWorker;
 import com.yvolabs.hogwartsartifactsapi.wizard.Wizard;
+import com.yvolabs.hogwartsartifactsapi.wizard.dto.WizardDto;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -28,7 +37,7 @@ import static org.mockito.Mockito.*;
  */
 @ExtendWith(MockitoExtension.class)
 @ActiveProfiles(value = "dev")
-class ArtifactServiceTest {
+class ArtifactServiceImplTest {
     // ! @Mock creates a mock.
     // ! @InjectMocks creates an instance of the class and injects the mocks that are created with the @Mock (or @Spy) annotations into this instance.
     // ! TDD: Red - Green - Refactor
@@ -36,6 +45,9 @@ class ArtifactServiceTest {
 
     @Mock
     private ArtifactRepository artifactRepository;
+
+    @Mock
+    private ChatClient chatClient;
 
     @Mock
     private IdWorker idWorker;
@@ -184,6 +196,69 @@ class ArtifactServiceTest {
         assertThrows(ObjectNotFoundException.class, () -> artifactService.delete(artifactId));
         verify(artifactRepository, times(1)).findById(artifactId);
     }
+
+    @Test
+    void testSummarizeSuccess() throws JsonProcessingException {
+        // Given:
+        WizardDto wizardDto = WizardDto.builder()
+                .id(1)
+                .name("Albus Dombledore")
+                .numberOfArtifacts(2)
+                .build();
+
+        List<ArtifactDto> artifactDtos = List.of(
+                ArtifactDto.builder()
+                        .id("1250808601744904191")
+                        .name("Deluminator")
+                        .description("A Deluminator is a device invented by Albus Dumbledore that resembles a cigarette lighter. It is used to remove or absorb (as well as return) the light from any light source to provide cover to the user.")
+                        .imageUrl("imageUrl")
+                        .owner(wizardDto)
+                        .build(),
+                ArtifactDto.builder()
+                        .id("1250808601744904193")
+                        .name("Elder Wand")
+                        .description("The Elder Wand, known throughout history as the Deathstick or the Wand of Destiny, is an extremely powerful wand made of elder wood with a core of Thestral tail hair.")
+                        .imageUrl("imageUrl")
+                        .owner(wizardDto)
+                        .build()
+        );
+
+
+        // convert artifactDtos to json
+        ObjectMapper objectMapper = new ObjectMapper();
+        String jsonArray = objectMapper.writeValueAsString(artifactDtos);
+
+        // prepare messages
+        List<Message> messages = List.of(
+                Message.builder()
+                        .role("system")
+                        .content("Your task is to generate a short summary of a given JSON array in at most 100 words. The summary must include the number of artifacts, each artifact's description, and the ownership information. Don't mention that the summary is from a given JSON array.") //todo change to real content
+                        .build(),
+                Message.builder()
+                        .role("user")
+                        .content(jsonArray)
+                        .build()
+        );
+
+        //chatClient to generate a text summary based on the given chatRequest
+        ChatRequest chatRequest = ChatRequest.builder()
+                .model("gpt-4")
+                .messages(messages)
+                .build();
+
+        ChatResponse chatResponse = new ChatResponse(List.of(
+                new Choice(0, new Message("assistant", "A summary of two artifacts owned by Albus Dumbledore."))));
+
+        given(this.chatClient.generate(chatRequest)).willReturn(chatResponse);
+
+        // When:
+        String summary = this.artifactService.summarize(artifactDtos);
+
+        // Then:
+        assertThat(summary).isEqualTo("A summary of two artifacts owned by Albus Dumbledore.");
+        verify(this.chatClient, times(1)).generate(chatRequest);
+    }
+
 
     //helpers
     private void setArtifactsTestData() {

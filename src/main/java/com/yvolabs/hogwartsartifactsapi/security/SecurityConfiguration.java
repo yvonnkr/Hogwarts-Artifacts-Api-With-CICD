@@ -68,6 +68,8 @@ public class SecurityConfiguration {
         return http
                 .authorizeHttpRequests((authorizeRequests) -> {
                     authorizeRequests
+                            //artifacts
+                            .requestMatchers(HttpMethod.GET, baseurl + "/artifacts/summary").hasAuthority("ROLE_admin")
                             .requestMatchers(HttpMethod.GET, baseurl + "/artifacts/**").permitAll()
                             //users
                             .requestMatchers(HttpMethod.GET, baseurl + "/users/**").hasAuthority("ROLE_admin")
