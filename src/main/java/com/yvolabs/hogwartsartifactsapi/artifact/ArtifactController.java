@@ -9,6 +9,8 @@ import com.yvolabs.hogwartsartifactsapi.system.StatusCode;
 import io.micrometer.core.instrument.MeterRegistry;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -44,16 +46,21 @@ public class ArtifactController {
         return ResponseEntity.ok(result);
     }
 
+    // pagination - artifacts?page=2&size=2&sort=name,desc
     @GetMapping
-    public ResponseEntity<Result> findAllArtifacts() {
-        List<Artifact> artifacts = artifactService.findAll();
-        List<ArtifactDto> artifactDtos = artifacts.stream()
-                .map(artifactToArtifactDtoConverter::convert).toList();
+    public ResponseEntity<Result> findAllArtifacts(Pageable pageable) {
+        // find all returns a page of artifacts
+        Page<Artifact> artifactPage = artifactService.findAll(pageable);
+
+        // convert artifactPage to a page of artifactDtos
+        Page<ArtifactDto> artifactDtoPage = artifactPage
+                .map(artifactToArtifactDtoConverter::convert);
+
         Result result = Result.builder()
                 .flag(true)
                 .code(StatusCode.SUCCESS)
                 .message("Find All Success")
-                .data(artifactDtos)
+                .data(artifactDtoPage)
                 .build();
 
         return ResponseEntity.ok(result);

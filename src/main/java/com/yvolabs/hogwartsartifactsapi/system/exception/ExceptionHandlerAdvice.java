@@ -8,6 +8,7 @@ import com.nimbusds.jose.shaded.gson.JsonParser;
 import com.yvolabs.hogwartsartifactsapi.system.Result;
 import com.yvolabs.hogwartsartifactsapi.system.StatusCode;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.mapping.PropertyReferenceException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
@@ -143,6 +144,18 @@ public class ExceptionHandlerAdvice {
         return new ResponseEntity<>(result, ex.getStatusCode());
     }
 
+    // mapping errors
+    @ExceptionHandler(PropertyReferenceException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    Result handlePropertyReferenceException(PropertyReferenceException ex) {
+        return Result.builder()
+                .flag(false)
+                .code(StatusCode.INVALID_ARGUMENT)
+                .message("Invalid property reference")
+                .data(ex.getMessage())
+                .build();
+    }
+
     // endpoint errors
     @ExceptionHandler({NoHandlerFoundException.class, NoResourceFoundException.class})
     @ResponseStatus(HttpStatus.NOT_FOUND)
@@ -163,7 +176,7 @@ public class ExceptionHandlerAdvice {
     Result handleOtherException(Exception ex) {
         return Result.builder()
                 .flag(false)
-                .code(StatusCode.UNAUTHORIZED)
+                .code(StatusCode.INTERNAL_SERVER_ERROR)
                 .message("A server internal error occurred.")
                 .data(ex.getMessage())
                 .build();

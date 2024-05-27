@@ -14,6 +14,8 @@ import io.micrometer.observation.annotation.Observed;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -38,6 +40,15 @@ public class ArtifactServiceImpl implements ArtifactService {
                 .orElseThrow(() -> new ObjectNotFoundException("artifact", artifactId));
     }
 
+
+    // with pagination
+    @Override
+    public Page<Artifact> findAll(Pageable pageable) {
+
+        return artifactRepository.findAll(pageable);
+    }
+
+    // without pagination
     @Override
     @Timed("findAllArtifactsService.time") // actuator metrics - measure the latency of this method
     public List<Artifact> findAll() {
@@ -116,4 +127,6 @@ public class ArtifactServiceImpl implements ArtifactService {
 
 
     }
+
+
 }
