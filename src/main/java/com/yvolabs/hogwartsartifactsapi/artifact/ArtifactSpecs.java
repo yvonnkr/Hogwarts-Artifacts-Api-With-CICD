@@ -1,6 +1,5 @@
-package com.yvolabs.hogwartsartifactsapi;
+package com.yvolabs.hogwartsartifactsapi.artifact;
 
-import com.yvolabs.hogwartsartifactsapi.artifact.Artifact;
 import org.springframework.data.jpa.domain.Specification;
 
 /**
