@@ -19,6 +19,8 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultActions;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.httpBasic;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -72,7 +74,43 @@ public class ArtifactControllerIntegrationTest {
                 .andExpect(jsonPath("$.flag").value(true))
                 .andExpect(jsonPath("$.code").value(StatusCode.SUCCESS))
                 .andExpect(jsonPath("$.message").value("Find All Success"))
-                .andExpect(jsonPath("$.data", Matchers.hasSize(6)));
+                .andExpect(jsonPath("$.data.content", Matchers.hasSize(6)));
+    }
+
+    @Test
+    @DisplayName("Check findAllArtifacts With Paging and Sorting (GET)")
+    @DirtiesContext(methodMode = DirtiesContext.MethodMode.BEFORE_METHOD)
+    void testFindAllSuccessWithPagingAndSorting() throws Exception {
+        MultiValueMap<String, String> queryParams = new LinkedMultiValueMap<>();
+        queryParams.add("page", "0");
+        queryParams.add("size", "2");
+        queryParams.add("sort", "name,asc");
+
+        mockMvc.perform(get(ARTIFACTS_PATH).params(queryParams).accept(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.flag").value(true))
+                .andExpect(jsonPath("$.code").value(StatusCode.SUCCESS))
+                .andExpect(jsonPath("$.message").value("Find All Success"))
+                .andExpect(jsonPath("$.data.content", Matchers.hasSize(2)))
+                .andExpect(jsonPath("$.data.pageable.pageNumber").value(0))
+                .andExpect(jsonPath("$.data.pageable.pageSize").value(2))
+                .andExpect(jsonPath("$.data.pageable.sort.sorted").value(true));
+    }
+
+    @Test
+    @DisplayName("Check findAllArtifacts Throws With Invalid Sorting Property values (GET)")
+    @DirtiesContext(methodMode = DirtiesContext.MethodMode.BEFORE_METHOD)
+    void testFindAllThrowsWithInvalidPagingAndSortingProperty() throws Exception {
+        MultiValueMap<String, String> queryParams = new LinkedMultiValueMap<>();
+        queryParams.add("page", "0");
+        queryParams.add("size", "20");
+        queryParams.add("sort", "name,ascxx"); // invalid sort prop name 'ascxx'
+
+        mockMvc.perform(get(ARTIFACTS_PATH).params(queryParams).accept(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.flag").value(false))
+                .andExpect(jsonPath("$.code").value(StatusCode.INVALID_ARGUMENT))
+                .andExpect(jsonPath("$.message").value("Invalid property reference"))
+                .andExpect(jsonPath("$.data").value("No property 'ascxx' found for type 'Artifact'"));
+
     }
 
     @Test
@@ -126,7 +164,7 @@ public class ArtifactControllerIntegrationTest {
                 .andExpect(jsonPath("$.flag").value(true))
                 .andExpect(jsonPath("$.code").value(StatusCode.SUCCESS))
                 .andExpect(jsonPath("$.message").value("Find All Success"))
-                .andExpect(jsonPath("$.data", Matchers.hasSize(7)));
+                .andExpect(jsonPath("$.data.content", Matchers.hasSize(7)));
     }
 
     @Test
@@ -158,8 +196,9 @@ public class ArtifactControllerIntegrationTest {
                 .andExpect(jsonPath("$.flag").value(true))
                 .andExpect(jsonPath("$.code").value(StatusCode.SUCCESS))
                 .andExpect(jsonPath("$.message").value("Find All Success"))
-                .andExpect(jsonPath("$.data", Matchers.hasSize(6)));
+                .andExpect(jsonPath("$.data.content", Matchers.hasSize(6)));
     }
+
 
     @Test
     @DisplayName("Check updateArtifact with valid input (PUT)")
