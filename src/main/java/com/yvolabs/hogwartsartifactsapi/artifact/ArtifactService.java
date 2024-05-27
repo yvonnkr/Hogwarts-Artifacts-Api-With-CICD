@@ -6,6 +6,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author Yvonne N
@@ -24,4 +25,7 @@ public interface ArtifactService {
     void delete(String artifactId);
 
     String summarize(List<ArtifactDto> artifactDtos) throws JsonProcessingException;
+
+    Page<Artifact> findByCriteria(Map<String, String> searchCriteria, Pageable pageable);
+
 }

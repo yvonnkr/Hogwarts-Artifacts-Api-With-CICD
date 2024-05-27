@@ -2,6 +2,7 @@ package com.yvolabs.hogwartsartifactsapi.artifact;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.yvolabs.hogwartsartifactsapi.ArtifactSpecs;
 import com.yvolabs.hogwartsartifactsapi.artifact.dto.ArtifactDto;
 import com.yvolabs.hogwartsartifactsapi.client.ai.chat.ChatClient;
 import com.yvolabs.hogwartsartifactsapi.client.ai.chat.dto.ChatRequest;
@@ -16,9 +17,12 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author Yvonne N
@@ -126,6 +130,29 @@ public class ArtifactServiceImpl implements ArtifactService {
         return chatResponse.choices().get(0).message().content();
 
 
+    }
+
+    @Override
+    public Page<Artifact> findByCriteria(Map<String, String> searchCriteria, Pageable pageable) {
+        Specification<Artifact> spec = Specification.where(null);
+
+        if (StringUtils.hasLength(searchCriteria.get("id"))) {
+            spec = spec.and(ArtifactSpecs.hasId(searchCriteria.get("id")));
+        }
+
+        if (StringUtils.hasLength(searchCriteria.get("name"))) {
+            spec = spec.and(ArtifactSpecs.containsName(searchCriteria.get("name")));
+        }
+
+        if (StringUtils.hasLength(searchCriteria.get("description"))) {
+            spec = spec.and(ArtifactSpecs.containsDescription(searchCriteria.get("description")));
+        }
+
+        if (StringUtils.hasLength(searchCriteria.get("ownerName"))) {
+            spec = spec.and(ArtifactSpecs.hasOwnerName(searchCriteria.get("ownerName")));
+        }
+
+        return artifactRepository.findAll(spec, pageable);
     }
 
 

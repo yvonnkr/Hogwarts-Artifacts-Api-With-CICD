@@ -15,6 +15,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author Yvonne N
@@ -121,5 +122,23 @@ public class ArtifactController {
                 .message("Summarize Success")
                 .data(artifactSummary)
                 .build();
+    }
+
+    // Find artifacts by search criteria, Return a page of artifacts that match the search criteria.
+    @PostMapping("/search")
+    public Result findArtifactsByCriteria(@RequestBody Map<String, String> searchCriteria, Pageable pageable) {
+
+        Page<Artifact> artifactPage = artifactService.findByCriteria(searchCriteria, pageable);
+
+        Page<ArtifactDto> artifactDtoPage = artifactPage
+                .map(artifactToArtifactDtoConverter::convert);
+
+        return Result.builder()
+                .flag(true)
+                .code(StatusCode.SUCCESS)
+                .message("Search Success")
+                .data(artifactDtoPage)
+                .build();
+
     }
 }
