@@ -2,7 +2,6 @@ package com.yvolabs.hogwartsartifactsapi.artifact;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.yvolabs.hogwartsartifactsapi.ArtifactSpecs;
 import com.yvolabs.hogwartsartifactsapi.artifact.dto.ArtifactDto;
 import com.yvolabs.hogwartsartifactsapi.client.ai.chat.ChatClient;
 import com.yvolabs.hogwartsartifactsapi.client.ai.chat.dto.ChatRequest;

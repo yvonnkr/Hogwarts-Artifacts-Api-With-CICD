@@ -9,8 +9,8 @@ import org.springframework.stereotype.Repository;
  * @apiNote To support Specification, We need to extend repo with JpaSpecificationExecutor Class
  *          We define some specification then we can use them to create a query and can combine the specs using logical operators(and,or,not etc.)
  *          The findAll(Specification<T> spec) will be called
- * @see     ArtifactController
- * @see     com.yvolabs.hogwartsartifactsapi.ArtifactSpecs
+ * @see     ArtifactController ::summarizeArtifacts
+ * @see     ArtifactSpecs
 
  */
 @Repository
