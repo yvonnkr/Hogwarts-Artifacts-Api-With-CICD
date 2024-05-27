@@ -22,6 +22,9 @@ import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.httpBasic;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -287,6 +290,80 @@ public class ArtifactControllerIntegrationTest {
                 .andExpect(jsonPath("$.code").value(StatusCode.NOT_FOUND))
                 .andExpect(jsonPath("$.message").value("Could not find artifact with Id 1250808601744904199"))
                 .andExpect(jsonPath("$.data").isEmpty());
+    }
+
+    @Test
+    void findArtifactByDescription() throws Exception {
+        // searchCriteria
+        Map<String, String> searchCriteria = new HashMap<>();
+        searchCriteria.put("description", "hogwarts");
+
+        // pagination
+        MultiValueMap<String, String> queryParams = new LinkedMultiValueMap<>();
+        queryParams.add("page", "0");
+        queryParams.add("size", "2");
+        queryParams.add("sort", "name,asc");
+
+        mockMvc.perform(post(ARTIFACTS_PATH + "/search").params(queryParams)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(searchCriteria))
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.flag").value(true))
+                .andExpect(jsonPath("$.code").value(StatusCode.SUCCESS))
+                .andExpect(jsonPath("$.message").value("Search Success"))
+                .andExpect(jsonPath("$.data.content", Matchers.hasSize(2)));
+
+
+    }
+
+    @Test
+    void findArtifactByNameAndDescription() throws Exception {
+        // searchCriteria
+        Map<String, String> searchCriteria = new HashMap<>();
+        searchCriteria.put("name", "sword");
+        searchCriteria.put("description", "hogwarts");
+
+        // pagination
+        MultiValueMap<String, String> queryParams = new LinkedMultiValueMap<>();
+        queryParams.add("page", "0");
+        queryParams.add("size", "2");
+        queryParams.add("sort", "name,asc");
+
+        mockMvc.perform(post(ARTIFACTS_PATH + "/search").params(queryParams)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(searchCriteria))
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.flag").value(true))
+                .andExpect(jsonPath("$.code").value(StatusCode.SUCCESS))
+                .andExpect(jsonPath("$.message").value("Search Success"))
+                .andExpect(jsonPath("$.data.content", Matchers.hasSize(1)));
+
+
+    }
+
+    @Test
+    void findArtifactByIdAndNameAndOwnerName() throws Exception {
+        // searchCriteria
+        Map<String, String> searchCriteria = new HashMap<>();
+        searchCriteria.put("id", "1250808601744904192");
+        searchCriteria.put("name", "cloak");
+        searchCriteria.put("ownerName", "harry potter");
+
+        // pagination
+        MultiValueMap<String, String> queryParams = new LinkedMultiValueMap<>();
+        queryParams.add("page", "0");
+        queryParams.add("size", "2");
+        queryParams.add("sort", "name,asc");
+
+        mockMvc.perform(post(ARTIFACTS_PATH + "/search").params(queryParams)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(searchCriteria))
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.flag").value(true))
+                .andExpect(jsonPath("$.code").value(StatusCode.SUCCESS))
+                .andExpect(jsonPath("$.message").value("Search Success"))
+                .andExpect(jsonPath("$.data.content", Matchers.hasSize(1)));
+
     }
 
 
